@@ -34,13 +34,13 @@ runs:
 
     - name: Update README.md
       run: |
-        sed -i '/<!-- START AUTO-UPDATE -->/,/<!-- END AUTO-UPDATE -->/{ \
-        /<!-- START AUTO-UPDATE -->/ { \
-        p \
-        r README.tmp \
-        } \
-        /<!-- END AUTO-UPDATE -->/ p \
-        d \
+        sed -i '/<!-- START AUTO-UPDATE -->/,/<!-- END AUTO-UPDATE -->/{
+          /<!-- START AUTO-UPDATE -->/ {
+          p
+          r README.tmp
+          }
+          /<!-- END AUTO-UPDATE -->/ p
+          d
         }' README.md
       shell: bash
 
