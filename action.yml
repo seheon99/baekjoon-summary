@@ -25,8 +25,15 @@ runs:
         fi
       shell: bash
 
+    - name: Ensure sed command
+      run: |
+        if ! command -v sed &> /dev/null; then
+          sudo apt-get update && sudo apt-get install -y sed
+        fi
+      shell: bash
+
     - name: Update README.md
-      run: \
+      run: |
         sed -i '/<!-- START AUTO-UPDATE -->/,/<!-- END AUTO-UPDATE -->/{ \
         /<!-- START AUTO-UPDATE -->/ { \
         p \
