@@ -1,0 +1,52 @@
+name: Baekjoon profile summary
+
+description: Generate baekjoon rating summary in README.md via solved.ac
+
+inputs:
+  username:
+    description: "백준에서 사용중인 유저 이름"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@4
+
+    - name: Generate solved.ac summary
+      run: python3 ${{ github.action_path }}/summary_solvedac.py $INPUT_USERNAME > README.tmp
+      shell: bash
+
+    - name: Ensure AUTO-UPDATE section exists
+      run: |
+        if ! grep -q "<!-- START AUTO-UPDATE -->" README.md; then
+          echo -e "\n<!-- START AUTO-UPDATE -->\n<!-- END AUTO-UPDATE -->" >> README.md
+        elif ! grep -q "<!-- END AUTO-UPDATE -->" README.md; then
+          sed -i 's/<!-- START AUTO-UPDATE -->/<!-- START AUTO-UPDATE -->\n<!-- END AUTO-UPDATE -->/' README.md
+        fi
+      shell: bash
+
+    - name: Update README.md
+      run: \
+        sed -i '/<!-- START AUTO-UPDATE -->/,/<!-- END AUTO-UPDATE -->/{ \
+        /<!-- START AUTO-UPDATE -->/ { \
+        p \
+        r README.tmp \
+        } \
+        /<!-- END AUTO-UPDATE -->/ p \
+        d \
+        }' README.md
+      shell: bash
+
+    - name: Commit and push README.md
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add README.md
+        git commit -m ""
+        git push
+      shell: bash
+
+branding:
+  icon: "edit"
+  color: "yellow"
