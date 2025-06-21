@@ -58,11 +58,11 @@ print()
 print("## 레이팅 종합")
 print()
 
-get_rating = lambda x: round(175 * (1 - 0.995**x))
+get_rating = lambda x: round(200 * (1 - 0.997**x))
 count = 0
 while (
     get_rating(solved_count + count) == get_rating(solved_count)
-    and rating_by_solved_count != 175
+    and rating_by_solved_count != 200
 ):
     count += 1
 
@@ -92,5 +92,5 @@ for n in range(min(lowest_point + 10, PROBLEM_TOP_TIER), lowest_point, -1):
 print()
 
 print(
-    f"[^1]: `{min(rating_by_solved_count + 1, 175)} = round(175 * (1 - 0.995 ** {solved_count + count}))`"
+    f"[^1]: `{min(rating_by_solved_count + 1, 200)} = round(200 * (1 - 0.997 ** {solved_count + count}))`"
 )
