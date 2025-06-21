@@ -4,7 +4,7 @@
 
 ```yml
 - uses: actions/checkout@v4
-- uses: seheon99/baekjoon-summary@d54b55e2d7a1511aeaf3c7a959b5d8b791ed1fa4
+- uses: seheon99/baekjoon-summary@84d86b3137f6b45e52dcb1d60528ef28bbde411f
   with:
     username: YOUR_BAEKJOON_HANDLE_HERE
 ```
