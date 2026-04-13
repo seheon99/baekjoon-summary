@@ -1,10 +1,11 @@
 import math
-from sys import argv
+import sys
+import time
 
 import requests
 
 # fmt: off
-USERNAME = argv[1]
+USERNAME = sys.argv[1]
 SOLVED_URL = f"https://solved.ac/{USERNAME}"
 BADGE_URL = f"http://mazassumnida.wtf/api/generate_badge?boj={USERNAME}"
 USER_API_URL = "https://solved.ac/api/v3/user/show"
@@ -23,6 +24,42 @@ TIER_RATING = [
 ]
 # fmt: on
 
+RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
+MAX_RETRIES = 3
+BACKOFF_BASE = 2
+
+
+def api_get(url, params):
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            response = requests.get(url, params=params, timeout=30)
+        except requests.RequestException as exc:
+            if attempt == MAX_RETRIES:
+                print(f"Error: request to {url} failed after {MAX_RETRIES} attempts: {exc}", file=sys.stderr)
+                sys.exit(1)
+            time.sleep(BACKOFF_BASE ** attempt)
+            continue
+
+        if response.status_code == 200:
+            try:
+                return response.json()
+            except ValueError:
+                if attempt == MAX_RETRIES:
+                    print(f"Error: {url} returned HTTP 200 but body is not valid JSON.", file=sys.stderr)
+                    sys.exit(1)
+                time.sleep(BACKOFF_BASE ** attempt)
+                continue
+
+        if response.status_code in RETRYABLE_STATUS_CODES:
+            if attempt == MAX_RETRIES:
+                print(f"Error: {url} returned HTTP {response.status_code} after {MAX_RETRIES} attempts.", file=sys.stderr)
+                sys.exit(1)
+            time.sleep(BACKOFF_BASE ** attempt)
+            continue
+
+        print(f"Error: {url} returned HTTP {response.status_code}: {response.text[:200]}", file=sys.stderr)
+        sys.exit(1)
+
 
 def get_tier_title(x):
     titles = ["Unrated", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Ruby", "Master"] # fmt: skip
@@ -38,8 +75,7 @@ def get_tier_color(x):
     return colors[math.ceil(x / 5)]
 
 
-request = requests.get(USER_API_URL, {"handle": USERNAME})
-user = request.json()
+user = api_get(USER_API_URL, {"handle": USERNAME})
 
 tier = user["tier"]
 rating = user["rating"]
@@ -78,8 +114,7 @@ print()
 print("## 난이도 별 얻게 될 점수")
 print()
 
-request = requests.get(TOP_100_API_URL, {"handle": USERNAME})
-top_100 = request.json()
+top_100 = api_get(TOP_100_API_URL, {"handle": USERNAME})
 lowest_point = top_100["items"][-1]["level"]
 
 print("| Level | Earning Points |")
