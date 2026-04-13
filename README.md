@@ -3,7 +3,7 @@
 # 사용 방법
 
 ```yml
-- uses: actions/checkout@v4
+- uses: actions/checkout@v5
 - uses: seheon99/baekjoon-summary@84d86b3137f6b45e52dcb1d60528ef28bbde411f
   with:
     username: YOUR_BAEKJOON_HANDLE_HERE
